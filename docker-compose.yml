@@ -1,0 +1,46 @@
+version: '3.1'
+services:
+  postgres:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+    - "./.docker/postgres/data:/var/lib/postgresql/data"
+  keycloak:
+    build: .
+    image: "adorsys/sts-keycloak:latest"
+    environment:
+      KEYCLOAK_PASSWORD: admin123
+      KEYCLOAK_USER: admin
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_PORT_5432_TCP_ADDR: postgres
+    ports:
+    - "8080:8080"
+    - "8787:8787"
+    volumes:
+    - "./.docker/keycloak/data:/opt/jboss/keycloak/standalone/data"
+    links:
+    - postgres
+    - sts
+    command:
+    - "-b"
+    - "0.0.0.0"
+    - "--debug"
+  post_process:
+    image: adorsys/keycloak-config-cli:latest
+    depends_on:
+    - keycloak
+    links:
+    - keycloak
+    volumes:
+    - ./config:/opt/keycloak-config-cli/configs
+    environment:
+    - KEYCLOAK_URL=http://keycloak:8080/auth
+    - KEYCLOAK_ADMIN=admin
+    - KEYCLOAK_ADMIN_PASSWORD=admin123
+  sts:
+    image: "adorsys/sts-example:latest"
+    ports:
+    - "8888:8888"
