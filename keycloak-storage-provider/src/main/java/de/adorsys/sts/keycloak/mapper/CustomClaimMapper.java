@@ -1,7 +1,7 @@
 package de.adorsys.sts.keycloak.mapper;
 
 import de.adorsys.sts.keycloak.Constants;
-import org.keycloak.models.AuthenticatedClientSessionModel;
+import org.keycloak.models.ClientSessionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.UserSessionModel;
@@ -47,7 +47,7 @@ public class CustomClaimMapper extends AbstractOIDCProtocolMapper implements OID
     }
 
     @Override
-    public AccessToken transformAccessToken(AccessToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserSessionModel userSession, AuthenticatedClientSessionModel clientSession) {
+    public AccessToken transformAccessToken(AccessToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserSessionModel userSession, ClientSessionModel clientSession) {
         AccessToken accessToken = super.transformAccessToken(token, mappingModel, session, userSession, clientSession);
 
         // Put the note into the access token

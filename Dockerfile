@@ -1,4 +1,4 @@
-FROM jboss/keycloak:3.2.1.Final
+FROM jboss/keycloak:2.5.5.Final
 
 ADD docker/cli/init_keycloak.cli /install/init_keycloak.cli
 

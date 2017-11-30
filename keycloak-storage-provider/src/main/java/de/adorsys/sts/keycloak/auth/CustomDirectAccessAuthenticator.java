@@ -45,7 +45,7 @@ public class CustomDirectAccessAuthenticator extends ValidatePassword {
         } else {
             Object note = credentialModel.getNote(Constants.CUSTOM_USER_SECRET_NOTE_KEY);
             if (note != null) {
-                context.getAuthenticationSession().setUserSessionNote(Constants.CUSTOM_USER_SECRET_NOTE_KEY, note.toString());
+                context.getClientSession().setUserSessionNote(Constants.CUSTOM_USER_SECRET_NOTE_KEY, note.toString());
             }
             context.success();
         }

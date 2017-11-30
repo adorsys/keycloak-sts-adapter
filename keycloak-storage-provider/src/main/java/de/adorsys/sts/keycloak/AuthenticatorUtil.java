@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class AuthenticatorUtil {
 
     public static Optional<String> readScope(AuthenticationFlowContext context) {
-        Object scope = context.getAuthenticationSession().getClientNote(OAuth2Constants.SCOPE);
+        Object scope = context.getClientSession().getUserSessionNotes().get(OAuth2Constants.SCOPE);
 
         return Optional.ofNullable(scope)
                 .map(Object::toString);
