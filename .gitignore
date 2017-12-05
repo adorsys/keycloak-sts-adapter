@@ -6,3 +6,4 @@ target/
 .project
 .classpath
 .settings/
+get_token.bash.txt
