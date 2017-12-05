@@ -47,7 +47,7 @@ public class CustomUsernamePasswordForm extends UsernamePasswordForm {
             // Hint: even roles could be transported using these notes.
             Object note = credentialModel.getNote(Constants.CUSTOM_USER_SECRET_NOTE_KEY);
             if (note != null) {
-                context.getAuthenticationSession().setUserSessionNote(Constants.CUSTOM_USER_SECRET_NOTE_KEY, note.toString());
+                context.getClientSession().setUserSessionNote(Constants.CUSTOM_USER_SECRET_NOTE_KEY, note.toString());
             }
 
             return true;
