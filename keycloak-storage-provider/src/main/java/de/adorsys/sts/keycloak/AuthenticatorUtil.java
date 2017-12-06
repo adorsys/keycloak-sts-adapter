@@ -2,6 +2,7 @@ package de.adorsys.sts.keycloak;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.models.ClientSessionModel;
 import org.keycloak.models.UserCredentialModel;
 
 import java.util.ArrayList;
@@ -13,7 +14,9 @@ import java.util.stream.Collectors;
 public class AuthenticatorUtil {
 
     public static Optional<String> readScope(AuthenticationFlowContext context) {
-        Object scope = context.getClientSession().getUserSessionNotes().get(OAuth2Constants.SCOPE);
+        ClientSessionModel clientSession = context.getClientSession();
+
+        Object scope = clientSession.getNotes().get(OAuth2Constants.SCOPE);
 
         return Optional.ofNullable(scope)
                 .map(Object::toString);
