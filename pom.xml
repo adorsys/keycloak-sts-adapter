@@ -24,12 +24,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>de.adorsys.sts</groupId>
-                <artifactId>keycloak-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-core</artifactId>
                 <version>${keycloak.version}</version>
@@ -70,12 +64,6 @@
                 <artifactId>infinispan-cachestore-remote</artifactId>
                 <version>${infinispan.version}</version>
                 <scope>provided</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>23.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
