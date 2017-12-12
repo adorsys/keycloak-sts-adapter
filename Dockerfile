@@ -1,8 +1,6 @@
 FROM registry.access.redhat.com/redhat-sso-7/sso71-openshift:1.2-7
 
-ADD docker/cli/init_keycloak.cli /install/init_keycloak.cli
-
-ADD keycloak-storage-provider/target/keycloak-storage-provider.jar /opt/eap/standalone/deployments/keycloak-storage-provider.jar
+COPY keycloak-storage-provider/target/keycloak-storage-provider.jar /opt/eap/standalone/deployments/keycloak-storage-provider.jar
 
 RUN rm -rf /opt/eap/standalone/configuration/standalone_xml_history
 
