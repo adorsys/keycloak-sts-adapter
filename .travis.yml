@@ -1,0 +1,26 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+services:
+  - docker
+
+script:
+  - mvn clean package -DskipTests -B -V
+
+deploy:
+  -
+    skip_cleanup: true
+    provider: script
+    script: /bin/bash .travis/docker_push.sh
+    on:
+      tags: true
+      # matches: vX.Y.Z, vX.Y.Z-A, vX.Y.Z-A-B.C.D, vX.Y.Z-A-B.C.D-E
+      condition: "$TRAVIS_TAG =~ ^v([[:digit:]]+\\.)+[[:digit:]]+(-[[:digit:]]+)?(-([[:digit:]]+\\.)+[[:digit:]]+(-[[:digit:]]+)?)?$"
+
+env:
+  global:
+  - DOCKER_IMAGE_NAME=adorsys/keycloak-sts-adapter
+  # encrypted docker hub credentials
+  - secure: WXvBXvLbnwJr1+ewggvnhgpWsKmMwNA+KcNlvYwCrYDDfvmHeqWUxCMCaCZXT5T3tkROoFuTxL/H10wcYUG7kNzBNrS9fHyYTfpNZCZea5NT9l+Lb7zKdD8p6hTVUbhn9xQZUDce7eTL5hFfi9XU1snyVO7XSGwESR0CSNfh+pk7Y0JjYk3hYYsxApSI1GO6CG86cIcCSrTdwO39Vr+6hiHd9FWsnno+hrukxwnffDrkDGmp42KezwaMqxDDZz+bKJPIeDUiYRw9sAlEB4V/RyYkH+6sVbcIRLWBMpV3FsElrcr7VRJt7Y7gaj4iUE4StH7qCYyUKATo/Gh7ohT3y9TknZZ64/ZyYfoOXWOEPudHa4cuqtS4o4H6Hxq3NUCyPtecDf5ag5LG0MQBkMQjaJAUdM8RBBiKGmISZzZSlEmn0v5HbZruwQ+uF4LISB/r0FhB0bTwBIfRQ0WZqlLaPh2LJnE0muAysOZPulPWSU3iyRqd0OBOdNsuipPIJvUpUJTp6gjUDrxmMuWhxOvfuQfoFzbmqfLD7zB2SemwiJo//DtW4R6d2aL55nfCusII4ZjpiDU/KtGBxpB+xw0rFlPSIl/CHD+V2XHJHdiXoA151b56ekqJdcb8cLQyBOdPZ5mCMkuC/8ODQqKC85Z/yCQUcUrM+LAIiTPYCgH73Vw=
