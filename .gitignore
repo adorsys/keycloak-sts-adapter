@@ -7,3 +7,4 @@ target/
 .classpath
 .settings/
 get_token.bash.txt
+pom.xml.versionsBackup
