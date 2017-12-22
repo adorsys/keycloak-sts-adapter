@@ -7,7 +7,7 @@
     <groupId>de.adorsys.sts</groupId>
     <artifactId>keycloak-sts-adapter</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.0</version>
+    <version>0.2.0-SNAPSHOT</version>
 
     <modules>
         <module>keycloak-storage-provider</module>
