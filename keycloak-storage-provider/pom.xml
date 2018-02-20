@@ -10,6 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>keycloak-storage-provider</artifactId>
+	<!-- 
+	<properties>
+        <keycloak.version>3.2.1.Final</keycloak.version>		
+	</properties>
+	 -->
 
     <dependencies>
         <dependency>
