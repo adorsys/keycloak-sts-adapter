@@ -1,11 +1,17 @@
 package de.adorsys.sts.keycloack.secret.adapter.embedded;
 
 import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.keycloak.models.RealmModel;
@@ -29,7 +35,7 @@ import de.adorsys.sts.resourceserver.service.EncryptionService;
 import de.adorsys.sts.resourceserver.service.ResourceServerService;
 
 public class UserSecretAdapterEmbedded implements UserSecretAdapter {
-	
+
 	private static String userMainSecretAttrName = UserSecretAdapter.USER_MAIN_SECRET_NOTE_KEY;
 
 	ResourceServerService resourceServerService;
@@ -42,16 +48,20 @@ public class UserSecretAdapterEmbedded implements UserSecretAdapter {
 	}
 
 	/**
-	 * The main secret is stored, encrypted with the user password. Remember that with this administrator
-	 * based password reset will not work.
+	 * The main secret is stored, encrypted with the user password. Remember
+	 * that with this administrator based password reset will not work.
 	 */
+	SecureRandom random = new SecureRandom();
+
 	@Override
 	public String retrieveMainSecret(RealmModel realmModel, UserModel userModel, UserCredentialModel credentialModel) {
 		List<String> userSecretClaimNameAttrs = userModel.getAttribute(userMainSecretAttrName);
-		if(userSecretClaimNameAttrs==null || userSecretClaimNameAttrs.isEmpty()){
-			return generateUserMainSecret(userModel, userMainSecretAttrName, credentialModel.getValue().getBytes());
+		byte[] secretEncryptionPasswordPBKDF2 = pbkdf2(credentialModel.getValue().toCharArray(), userModel.getId().getBytes(),
+				PBKDF2_ITERATIONS, HASH_BYTES);
+		if (userSecretClaimNameAttrs == null || userSecretClaimNameAttrs.isEmpty()) {
+			return generateUserMainSecret(userModel, userMainSecretAttrName, secretEncryptionPasswordPBKDF2);
 		} else {
-			return decrypt(userSecretClaimNameAttrs.iterator().next(), credentialModel.getValue().getBytes());
+			return decrypt(userSecretClaimNameAttrs.iterator().next(), secretEncryptionPasswordPBKDF2);
 		}
 	}
 
@@ -65,46 +75,52 @@ public class UserSecretAdapterEmbedded implements UserSecretAdapter {
 			throw new IllegalStateException(e);
 		}
 	}
-    private String generateUserMainSecret(UserModel userModel, String secretAttrName, byte[] secretEncryptionPassword) {
-			String userMainSecretPlain = RandomStringUtils.randomGraph(16);
-			Builder headerBuilder = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM);
-			JWEObject jweObj = new JWEObject(headerBuilder.build(), new Payload(userMainSecretPlain));
-	        try {
-	            jweObj.encrypt(new DirectEncrypter(secretEncryptionPassword));
-	        } catch (JOSEException e) {
-	            throw new IllegalStateException(e);
-	        }
-	        String customSecretAttr = jweObj.serialize();
-	        userModel.setAttribute(secretAttrName, Arrays.asList(customSecretAttr));
-	        return userMainSecretPlain;
-    }
 
-    private Map<String, String> readUserSecret(UserModel userModel, String userMainSecret, List<String> audiences) throws JOSEException, UnsupportedEncodingException, ParseException {
-    		Map<String, String> resourceSecrets = new HashMap<>();
-    		for (String audience : audiences) {
-	    		ResourceServer resourceServer = resourceServerService.getForAudience(audience);
-	    		if(resourceServer==null) continue;
-	    		
-	    		String userSecretClaimName = resourceServer.getUserSecretClaimName();
-	    		if(resourceSecrets.containsKey(userSecretClaimName)) continue;
-	    		
-	        List<String> userSecretClaimNameAttribute = userModel.getAttribute(userSecretClaimName);
-	        byte[] userMainSecretBytes = userMainSecret.getBytes("UTF-8");
-	        String userResourceSecretPlain;
-	        if (userSecretClaimNameAttribute == null || userSecretClaimNameAttribute.isEmpty()) {
-	        		userResourceSecretPlain = RandomStringUtils.randomNumeric(16);
-	        		String customSecretAttrEnc = encrypt(userResourceSecretPlain, userMainSecretBytes);
-	        		userModel.setAttribute(userSecretClaimName, Arrays.asList(customSecretAttrEnc));
-	        } else {
-	        		userResourceSecretPlain = decrypt(userSecretClaimNameAttribute.iterator().next(), userMainSecretBytes);
-	        }
-	        String userResourceSecretEncrypted = encryptionService.encryptFor(audience, userResourceSecretPlain);
-	        resourceSecrets.put(userSecretClaimName, userResourceSecretEncrypted);
-    		}
+	private String generateUserMainSecret(UserModel userModel, String secretAttrName, byte[] secretEncryptionPasswordPBKDF2) {
+		String userMainSecretPlain = RandomStringUtils.randomGraph(16);
+		Builder headerBuilder = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM);
+		JWEObject jweObj = new JWEObject(headerBuilder.build(), new Payload(userMainSecretPlain));
+		try {
+			jweObj.encrypt(new DirectEncrypter(secretEncryptionPasswordPBKDF2));
+		} catch (JOSEException e) {
+			throw new IllegalStateException(e);
+		}
+		String customSecretAttr = jweObj.serialize();
+		userModel.setAttribute(secretAttrName, Arrays.asList(customSecretAttr));
+		return userMainSecretPlain;
+	}
+
+	private Map<String, String> readUserSecret(UserModel userModel, String userMainSecret, List<String> audiences)
+			throws JOSEException, UnsupportedEncodingException, ParseException {
+		Map<String, String> resourceSecrets = new HashMap<>();
+		for (String audience : audiences) {
+			ResourceServer resourceServer = resourceServerService.getForAudience(audience);
+			if (resourceServer == null)
+				continue;
+
+			String userSecretClaimName = resourceServer.getUserSecretClaimName();
+			if (resourceSecrets.containsKey(userSecretClaimName))
+				continue;
+
+			List<String> userSecretClaimNameAttribute = userModel.getAttribute(userSecretClaimName);
+			byte[] secretEncryptionPasswordPBKDF2 = pbkdf2(userMainSecret.toCharArray(), userModel.getId().getBytes(),
+					PBKDF2_ITERATIONS, HASH_BYTES);
+
+			String userResourceSecretPlain;
+			if (userSecretClaimNameAttribute == null || userSecretClaimNameAttribute.isEmpty()) {
+				userResourceSecretPlain = RandomStringUtils.randomNumeric(16);
+				String customSecretAttrEnc = encrypt(userResourceSecretPlain, secretEncryptionPasswordPBKDF2);
+				userModel.setAttribute(userSecretClaimName, Arrays.asList(customSecretAttrEnc));
+			} else {				
+				userResourceSecretPlain = decrypt(userSecretClaimNameAttribute.iterator().next(), secretEncryptionPasswordPBKDF2);
+			}
+			String userResourceSecretEncrypted = encryptionService.encryptFor(audience, userResourceSecretPlain);
+			resourceSecrets.put(userSecretClaimName, userResourceSecretEncrypted);
+		}
 		return resourceSecrets;
-    }
-    
-    private String encrypt(String plain, byte[] key){
+	}
+
+	private String encrypt(String plain, byte[] key) {
 		Builder headerBuilder = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM);
 		JWEObject jweObj = new JWEObject(headerBuilder.build(), new Payload(plain));
 		try {
@@ -113,21 +129,35 @@ public class UserSecretAdapterEmbedded implements UserSecretAdapter {
 			throw new IllegalStateException(e);
 		}
 		return jweObj.serialize();
-    }
-    
-    private String decrypt(String encrypted, byte[] key){
+	}
+
+	private String decrypt(String encrypted, byte[] key) {
 		try {
-			JWEObject jweObject = JWEObject.parse(encrypted); 
+			JWEObject jweObject = JWEObject.parse(encrypted);
 			jweObject.decrypt(new DirectDecrypter(key));
 			return jweObject.getPayload().toString();
 		} catch (JOSEException | ParseException e) {
 			throw new IllegalStateException(e);
 		}
-    }
+	}
 
 	@Override
 	public void close() {
-		
+
 	}
 
+	public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
+	public static final int PBKDF2_ITERATIONS = 512;
+	public static final int HASH_BYTES = 16;
+
+	private static byte[] pbkdf2(char[] password, byte[] salt, int iterations, int bytes)
+	{
+		try {
+			PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, bytes * 8);
+			SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
+			return skf.generateSecret(spec).getEncoded();
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 }

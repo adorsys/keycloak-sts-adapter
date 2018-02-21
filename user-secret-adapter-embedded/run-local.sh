@@ -12,4 +12,4 @@ cd cli/
 ../bin/jboss-cli.sh --file=init_keycloak.cli 
 cd ..
 ./bin/add-user-keycloak.sh --user admin --password admin123
-./bin/standalone.sh --debug
+./bin/standalone.sh --debug -DSTS_RESOURCE_SERVERS_CONFIG_FILE=cli/SAMPLE_STS_RESOURCE_SERVERS_CONFIG_FILE.properties
