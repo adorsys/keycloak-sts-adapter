@@ -43,7 +43,7 @@ public class STSUsernamePasswordForm extends UsernamePasswordForm {
 
         credentials.add(credentialModel);
         if (password != null && !password.isEmpty() && context.getSession().userCredentialManager().isValid(context.getRealm(), user, credentials)) {
-			AuthenticatorUtil.addMainSecretToUserSession(userSecretAdapter, context, credentialModel);
+			AuthenticatorUtil.addMainSecretToUserSession(userSecretAdapter, context, user, credentialModel);
             return true;
         } else {
             context.getEvent().user(user);

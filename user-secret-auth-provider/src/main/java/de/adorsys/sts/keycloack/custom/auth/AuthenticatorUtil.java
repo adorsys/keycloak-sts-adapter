@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.UserCredentialModel;
+import org.keycloak.models.UserModel;
 
 import de.adorsys.sts.keycloack.secret.adapter.common.UserSecretAdapter;
 
@@ -35,8 +36,8 @@ public class AuthenticatorUtil {
                 .collect(Collectors.toList());
     }
     
-    public static void addMainSecretToUserSession(UserSecretAdapter userSecretStorage, AuthenticationFlowContext context, UserCredentialModel credentialModel ){
-		String userSecret = userSecretStorage.retrieveMainSecret(context.getRealm(), context.getUser(), credentialModel);
+    public static void addMainSecretToUserSession(UserSecretAdapter userSecretStorage, AuthenticationFlowContext context, UserModel user, UserCredentialModel credentialModel ){
+		String userSecret = userSecretStorage.retrieveMainSecret(context.getRealm(), user, credentialModel);
         // copy notes into the user session
         // Hint: it might have been interesting to distinguish between the different type of notes
         // that can be returned by a user storage provider like:

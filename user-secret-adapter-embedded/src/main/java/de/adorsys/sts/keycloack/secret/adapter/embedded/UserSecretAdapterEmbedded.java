@@ -14,6 +14,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
@@ -94,6 +95,7 @@ public class UserSecretAdapterEmbedded implements UserSecretAdapter {
 			throws JOSEException, UnsupportedEncodingException, ParseException {
 		Map<String, String> resourceSecrets = new HashMap<>();
 		for (String audience : audiences) {
+			if(StringUtils.isBlank(audience)) continue;
 			ResourceServer resourceServer = resourceServerService.getForAudience(audience);
 			if (resourceServer == null)
 				continue;

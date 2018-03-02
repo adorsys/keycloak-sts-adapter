@@ -66,7 +66,7 @@ public class STSDirectAccessAuthenticator extends ValidatePassword {
 					"Invalid user credentials");
 			context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
 		} else {
-			AuthenticatorUtil.addMainSecretToUserSession(userSecretAdapter, context, credentialModel);
+			AuthenticatorUtil.addMainSecretToUserSession(userSecretAdapter, context, context.getUser(), credentialModel);
 			context.success();
 		}
 	}

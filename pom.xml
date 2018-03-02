@@ -23,6 +23,7 @@
 		<keycloak.version>3.4.3.Final</keycloak.version>
 		<infinispan.version>8.2.8.Final</infinispan.version>
 		<envutils.version>0.2</envutils.version>
+		<sts.version>0.22.0</sts.version>
 	</properties>
 
 	<dependencyManagement>

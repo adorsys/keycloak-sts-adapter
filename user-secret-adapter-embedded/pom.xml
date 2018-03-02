@@ -37,22 +37,21 @@
 		<dependency>
 			<groupId>de.adorsys.sts</groupId>
 			<artifactId>sts-resource-server</artifactId>
-			<version>0.21.0</version>
-			<scope>provided</scope>
+			<version>${sts.version}</version>
 		</dependency>
-
+		
+		<!-- 
 		<dependency>
 			<groupId>de.adorsys.sts</groupId>
 			<artifactId>user-secret-protocol-mapper</artifactId>
 			<version>${project.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.adorsys.sts</groupId>
 			<artifactId>user-secret-auth-provider</artifactId>
 			<version>${project.version}</version>
-			<scope>provided</scope>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>de.adorsys.envutils</groupId>
 			<artifactId>envutils4j</artifactId>
@@ -94,7 +93,7 @@
 							<outputDirectory>${basedir}/target</outputDirectory>
 							<resources>
 								<resource>
-									<directory>src/docker</directory>
+									<directory>src/devops</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
@@ -102,40 +101,12 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>de.smartics.maven.plugin</groupId>
-				<artifactId>smartics-jboss-modules-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>create-modules-archive</id>
-						<goals>
-							<goal>create-modules-archive</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<dependencyExcludes>
-								<!-- 
-								<dependencyExclude>
-						            <groupId>net.minidev</groupId>
-						            <artifactId>json-smart</artifactId>
-								</dependencyExclude>
-								<dependencyExclude>
-						            <groupId>com.github.stephenc.jcip</groupId>
-						            <artifactId>jcip-annotations</artifactId>
-								</dependencyExclude>
-								 -->
-							</dependencyExcludes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<finalName>${project.build.finalName}-${project.version}-keycloak-${keycloak.version}</finalName>
-				</configuration>
-			</plugin>
+			<!-- 
+			 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+            </plugin>
 		</plugins>
 	</build>
 </project>
